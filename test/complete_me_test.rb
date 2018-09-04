@@ -83,4 +83,13 @@ class CompleteMeTest < Minitest::Test
     assert_equal ["pizzazz"].sort, sug.sort
   end
 
+  def test_it_can_populate_from_a_file
+    completion = CompleteMe.new
+    dictionary = File.read("/usr/share/dict/words")
+
+    completion.populate(dictionary)
+
+    assert completion.count > 200000
+  end
+
 end

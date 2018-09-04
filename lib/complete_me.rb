@@ -66,6 +66,12 @@ class CompleteMe
     end
   end
 
+  def populate(dictionary)
+    dictionary.split("\n").each do |word|
+      insert(word)
+    end
+  end
+
   def suggest(word)
     suggestions = []
     # traverse to the last letter of word
