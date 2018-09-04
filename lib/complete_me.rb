@@ -57,9 +57,57 @@ class CompleteMe
   end
 
   def insert(word)
+    if(word == nil)
+      return
+    end
     chars = word.chars
     if(@words.add_child(chars, 0))
       @count += 1
     end
+  end
+
+  def suggest(word)
+    suggestions = []
+    # traverse to the last letter of word
+    if(word)
+      chars = word.chars
+      node = find_leaf_node(chars)
+      if(node)
+        # depth-first search the node's children for valid words
+        suggest_words(node, word, suggestions)
+      end
+    end
+    suggestions
+  end
+
+  private
+
+  def suggest_words(node, word, words_array)
+    if(node.children)
+      node.children.values.each do |child|
+        # add this node's letter to letters
+        new_word = word + child.letter
+        if(child.valid?)
+          words_array << new_word
+        end
+        suggest_words(child, new_word, words_array)
+      end
+    end
+  end
+
+  def find_leaf_node(chars)
+    node = nil
+    word_set = @words.children
+    chars.each do |c|
+      if(word_set)
+        node = word_set[c]
+        if(node)
+          word_set = node.children
+        else
+          break
+        end
+      end
+    end
+    node
   end
 end
