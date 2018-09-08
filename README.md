@@ -19,3 +19,5 @@ This also required a refactoring so that the suggested words was a list of valid
 
 ### Iteration 3
 In order to prune nodes, a node is going to need a link to its parent. If we remove a leaf node, we have to traverse parent nodes and remove the node's letter from the parent's children. Then if the parent's children is size zero, keep traversing.
+
+I can't think of a good way to test this without exposing the nodes, both intermediate and valid.
