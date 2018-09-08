@@ -6,17 +6,18 @@ class CompleteMe
   end
 
   class Node
-    attr_reader :letter, :children
+    attr_reader :letter, :children, :parent
     attr_writer :valid
     attr_accessor :word, :search_selections
-    def initialize(letter=nil, valid_word=false)
+    def initialize(letter=nil, valid_word=false, parent=nil)
       @letter = letter
       @children = {}
       @valid = valid_word
+      @parent = parent
     end
 
     def to_s
-      "Node: word: #{word ? word : "nil"}, #{@letter ? @letter : "nil"}, #{@children}, #{@valid}, #{self.search_selections}"
+      "Node: word: #{word ? word : "nil"}, letter: #{@letter ? @letter : "nil"}, #{@children}, #{@valid}, #{self.search_selections}"
     end
 
     def valid?
@@ -115,7 +116,26 @@ class CompleteMe
     end
   end
 
+  def prune(word)
+    node = find_node(word)
+    if(node)
+      prune_node(node)
+    end
+  end
+
   private
+
+  def prune_node(node)
+    node.valid = false
+    @count -= 1
+    if(node.parent)
+      # remove the node
+      node.parent.children.delete(node.letter)
+      if(node.parent.children.size == 0)
+        prune_node(node.parent)
+      end
+    end
+  end
 
   def suggest_words(node, word, nodes_array)
     if(node.children)

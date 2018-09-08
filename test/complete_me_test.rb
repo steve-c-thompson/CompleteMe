@@ -187,6 +187,37 @@ class CompleteMeTest < Minitest::Test
     completion = CompleteMe.new
     completion.insert('trying')
     completion.insert('try')
+
+    sug = completion.suggest('tr')
+    assert_equal ['try', 'trying'], sug.sort
+
+    completion.prune('try')
+    assert_equal 1, completion.count
+    sug = completion.suggest('tr')
+    assert_equal ['trying'], sug
+  end
+
+  def test_it_can_prune_leaf_nodes
+    completion = CompleteMe.new
+    completion.insert('trying')
+    completion.insert('try')
+
+    sug = completion.suggest('tr')
+    assert_equal ['try', 'trying'], sug.sort
+
+    completion.prune('trying')
+    assert_equal 1, completion.count
+    sug = completion.suggest('tr')
+    assert_equal ['try'], sug
+  end
+
+  def test_it_can_prune_all_nodes
+    completion = CompleteMe.new
+    completion.insert('t')
+    assert_equal 1, completion.count
+    completion.prune('t')
+    assert_equal 0, completion.count
+
   end
 
 end
