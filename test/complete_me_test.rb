@@ -132,4 +132,27 @@ class CompleteMeTest < Minitest::Test
     assert_equal "pizza", sug[0]
   end
 
+  def test_it_suggests_words_and_sub_words_based_on_selections
+    completion = CompleteMe.new
+
+    dictionary = File.read("/usr/share/dict/words")
+
+    completion.populate(dictionary)
+
+    completion.select("piz", "pizzeria")
+    completion.select("piz", "pizzeria")
+    completion.select("piz", "pizzeria")
+
+    completion.select("pi", "pizza")
+    completion.select("pi", "pizza")
+    completion.select("pi", "pizzicato")
+
+    sug = completion.suggest("piz")
+    assert_equal "pizzeria", sug[0]
+
+    sug = completion.suggest("pi")
+    assert_equal "pizza", sug[0]
+    assert_equal "pizzicato", sug[1]
+  end
+
 end
