@@ -7,6 +7,7 @@ class CompleteMe
 
   class Node
     attr_reader :letter, :children
+    attr_accessor :word, :search_selections
     def initialize(letter=nil, valid_word=false)
       @letter = letter
       @children = {}
@@ -14,7 +15,7 @@ class CompleteMe
     end
 
     def to_s
-      "Node: #{@letter ? @letter : "nil"}, #{@children}, #{@valid}"
+      "Node: #{word}, #{@letter ? @letter : "nil"}, #{@children}, #{@valid}, #{self.search_selections}"
     end
 
     def valid?
@@ -43,6 +44,8 @@ class CompleteMe
           child = Node.new(node_letter, leaf_node)
           @children[node_letter] = child
           if(leaf_node)
+            child.word = letters.join
+            child.search_selections = {}
             return true
           else
             return child.add_child(letters, begin_index + 1)
@@ -76,34 +79,75 @@ class CompleteMe
     suggestions = []
     # traverse to the last letter of word
     if(word)
-      chars = word.chars
-      node = find_leaf_node(chars)
+      node = find_node(word)
       if(node)
         # depth-first search the node's children for valid words
         suggest_words(node, word, suggestions)
       end
     end
-    suggestions
+    # sort suggestions by the number of times word has been selected
+    suggestions.sort! do |a, b|
+      a_selections = a.search_selections
+      b_selections = b.search_selections
+      a_num = 0
+      b_num = 0
+      if(a_selections)
+        temp = a_selections[word]
+        if(temp)
+          a_num = temp
+        end
+      end
+      if(b_selections)
+        temp = b_selections[word]
+        if(temp)
+          b_num = temp
+        end
+      end
+      # this is a reverse sort
+      b_num - a_num
+    end
+
+    suggestions.map do |n|
+      n.word
+    end
+
+  end
+
+  def select(input, word)
+    # find the node
+    node = find_node(word)
+    # get its search_selections and add to (or create) its selection->count
+    if(node)
+      selections = node.search_selections
+      num = selections[input]
+      if(num)
+        num += 1
+      else
+        num = 1
+      end
+      selections[input] = num
+    end
   end
 
   private
 
-  def suggest_words(node, word, words_array)
+  def suggest_words(node, word, nodes_array)
     if(node.children)
       node.children.values.each do |child|
         # add this node's letter to letters
         new_word = word + child.letter
         if(child.valid?)
-          words_array << new_word
+          nodes_array << child
         end
-        suggest_words(child, new_word, words_array)
+        suggest_words(child, new_word, nodes_array)
       end
     end
   end
 
-  def find_leaf_node(chars)
+  def find_node(word_string)
     node = nil
     word_set = @words.children
+    chars = word_string.chars
     chars.each do |c|
       if(word_set)
         node = word_set[c]
@@ -116,4 +160,5 @@ class CompleteMe
     end
     node
   end
+
 end
