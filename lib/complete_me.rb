@@ -7,6 +7,7 @@ class CompleteMe
 
   class Node
     attr_reader :letter, :children
+    attr_writer :valid
     attr_accessor :word, :search_selections
     def initialize(letter=nil, valid_word=false)
       @letter = letter
@@ -15,7 +16,7 @@ class CompleteMe
     end
 
     def to_s
-      "Node: #{word}, #{@letter ? @letter : "nil"}, #{@children}, #{@valid}, #{self.search_selections}"
+      "Node: word: #{word ? word : "nil"}, #{@letter ? @letter : "nil"}, #{@children}, #{@valid}, #{self.search_selections}"
     end
 
     def valid?
@@ -37,7 +38,13 @@ class CompleteMe
             # if this node is in children, don't add a new one, but call add_child
             return child_node.add_child(letters, begin_index + 1)
           else
-            return false
+            if(child_node.valid?)
+              return false
+            else
+              child_node.valid = true
+              child_node.word = letters.join
+              return true
+            end
           end
         else
           # add this letter node as a child
@@ -85,32 +92,11 @@ class CompleteMe
         suggest_words(node, word, suggestions)
       end
     end
-    # sort suggestions by the number of times word has been selected
-    suggestions.sort! do |a, b|
-      a_selections = a.search_selections
-      b_selections = b.search_selections
-      a_num = 0
-      b_num = 0
-      if(a_selections)
-        temp = a_selections[word]
-        if(temp)
-          a_num = temp
-        end
-      end
-      if(b_selections)
-        temp = b_selections[word]
-        if(temp)
-          b_num = temp
-        end
-      end
-      # this is a reverse sort
-      b_num - a_num
-    end
+    sorted = sort_suggestions(word, suggestions)
 
-    suggestions.map do |n|
+    sorted.map do |n|
       n.word
     end
-
   end
 
   def select(input, word)
@@ -141,6 +127,30 @@ class CompleteMe
         end
         suggest_words(child, new_word, nodes_array)
       end
+    end
+  end
+
+  def sort_suggestions(word, suggestions)
+    # sort suggestions by the number of times word has been selected
+    suggestions.sort do |a, b|
+      a_selections = a.search_selections
+      b_selections = b.search_selections
+      a_num = 0
+      b_num = 0
+      if(a_selections)
+        temp = a_selections[word]
+        if(temp)
+          a_num = temp
+        end
+      end
+      if(b_selections)
+        temp = b_selections[word]
+        if(temp)
+          b_num = temp
+        end
+      end
+      # this is a reverse sort
+      b_num - a_num
     end
   end
 
