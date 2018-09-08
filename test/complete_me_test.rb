@@ -92,4 +92,44 @@ class CompleteMeTest < Minitest::Test
     assert completion.count > 200000
   end
 
+  def test_it_can_select_words
+    complete_me = CompleteMe.new
+
+    complete_me.insert("pizza")
+    complete_me.insert("pizzeria")
+    complete_me.insert("pizzazz")
+
+    sug = complete_me.suggest("piz")
+
+    complete_me.select("piz", "pizzeria")
+  end
+
+  def test_it_can_suggest_words_first_which_have_been_selected
+    complete_me = CompleteMe.new
+
+    complete_me.insert("pizza")
+    complete_me.insert("pizzeria")
+    complete_me.insert("pizzazz")
+
+    expected = ["pizza", "pizzeria", "pizzazz"].sort
+
+    sug = complete_me.suggest("piz")
+    assert_equal expected, sug.sort
+
+    complete_me.select("piz", "pizzeria")
+    expected.delete("pizzeria")
+    expected.unshift("pizzeria")
+
+    sug = complete_me.suggest("piz")
+    assert_equal "pizzeria", sug[0]
+
+    # select a different words to move to front
+
+    complete_me.select("piz", "pizza")
+    complete_me.select("piz", "pizza")
+
+    sug = complete_me.suggest("piz")
+    assert_equal "pizza", sug[0]
+  end
+
 end
