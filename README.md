@@ -14,3 +14,8 @@ When searching for suggestions, I made recursive calls to `suggest_word`, and th
 
 ### Iteration 2
 For weighted suggestions I added a second hash to the "valid" nodes - nodes that are actual words - structured as `search -> count`.
+
+This also required a refactoring so that the suggested words was a list of valid leaf nodes, each of which knew about its own word. I then got each word string from the node to return to a user.
+
+### Iteration 3
+In order to prune nodes, a node is going to need a link to its parent. If we remove a leaf node, we have to traverse parent nodes and remove the node's letter from the parent's children. Then if the parent's children is size zero, keep traversing.
